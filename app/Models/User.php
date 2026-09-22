@@ -22,7 +22,28 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
+
+    public function isHr(): bool
+    {
+        return $this->role === 'hr' || empty($this->role);
+    }
+
+    public function isKandidat(): bool
+    {
+        return $this->role === 'kandidat';
+    }
+
+    public function lamaran()
+    {
+        return $this->hasMany(Lamaran::class);
+    }
+
+    public function penugasanTes()
+    {
+        return $this->hasMany(PenugasanTes::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.
