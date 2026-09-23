@@ -164,9 +164,15 @@ class TesKandidatService
             'waktu_selesai' => now(),
         ]);
 
-        $percobaan->penugasanTes()->update([
-            'status_pengerjaan' => 'selesai',
-        ]);
+        $penugasan = $percobaan->penugasanTes;
+        if ($penugasan) {
+            $penugasan->update([
+                'status_pengerjaan' => 'selesai',
+            ]);
+
+            // Otomatis picu Smart Grading melalui AI Engine
+            \App\Jobs\ProcessSmartGrading::dispatch($penugasan->id);
+        }
     }
 
     /**

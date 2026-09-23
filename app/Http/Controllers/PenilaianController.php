@@ -45,13 +45,31 @@ class PenilaianController extends Controller
             'lamaran.lowongan',
             'kandidat',
             'paketTes',
-            'percobaan.jawaban',
+            'percobaan.jawaban.soal',
             'penilaian.detail',
             'penilaian.penilai',
             'penilaian.riwayat.user',
         ]);
 
-        return view('penilaian.show', compact('penugasan'));
+        $aiResult = \App\Models\AiProcessingResult::where('referensi_type', PenugasanTes::class)
+            ->where('referensi_id', $penugasan->id)
+            ->where('tipe', 'smart_grading')
+            ->latest('id')
+            ->first();
+
+        return view('penilaian.show', compact('penugasan', 'aiResult'));
+    }
+
+    public function retrySmartGrading(PenugasanTes $penugasan): RedirectResponse
+    {
+        try {
+            \App\Jobs\ProcessSmartGrading::dispatchSync($penugasan->id);
+            return redirect()->route('penilaian.show', $penugasan)
+                ->with('success', 'Smart Grading AI berhasil dijalankan ulang.');
+        } catch (\Exception $e) {
+            return redirect()->route('penilaian.show', $penugasan)
+                ->with('error', 'Gagal menjalankan Smart Grading AI: ' . $e->getMessage());
+        }
     }
 
     public function edit(PenugasanTes $penugasan): View

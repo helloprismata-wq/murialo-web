@@ -9,7 +9,10 @@
         <h1>{{ $lowongan->judul }}</h1>
         <p class="muted">🏢 {{ $lowongan->perusahaan }} · 📍 {{ $lowongan->lokasi }}</p>
     </div>
-    <a class="button" href="{{ route('lowongan.edit', $lowongan) }}">✏ Edit lowongan</a>
+    <div style="display: flex; gap: 8px; align-items: center;">
+        <a class="button button-primary" href="{{ route('lowongan.matching', $lowongan) }}" style="background: #6366f1; border-color: #4f46e5;">🎯 Skill Matching AI</a>
+        <a class="button" href="{{ route('lowongan.edit', $lowongan) }}">✏ Edit lowongan</a>
+    </div>
 </div>
 
 <article class="panel">
