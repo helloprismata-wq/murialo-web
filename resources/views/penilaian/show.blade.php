@@ -27,6 +27,13 @@
                 {{ $penugasan->status_penilaian === 'selesai_dinilai' ? 'Ubah Penilaian' : 'Input / Lanjutkan Penilaian' }}
             </a>
 
+            <form action="{{ route('penilaian.retry_ai', $penugasan) }}" method="post" style="display:inline;">
+                @csrf
+                <button type="submit" class="button button-secondary" style="border-color: #6366f1; color: #a5b4fc;" onclick="return confirm('Jalankan ulang evaluasi Smart Grading S-BERT dari AI Engine?');">
+                    ⚡ {{ isset($aiResult) ? 'Jalankan Ulang AI' : 'Evaluasi dengan AI' }}
+                </button>
+            </form>
+
             @if ($penugasan->status_penilaian === 'selesai_dinilai')
                 <form action="{{ route('penilaian.publish', $penugasan) }}" method="post" style="display:inline;" onsubmit="return confirm('{{ $penugasan->is_published ? 'Tarik kembali publikasi nilai dari kandidat?' : 'Publikasikan nilai ke kandidat? Kandidat akan dapat melihat nilai akhir.' }}');">
                     @csrf
@@ -39,10 +46,39 @@
         </div>
     </div>
 
-    <div class="disclaimer-banner info">
-        <span>ℹ</span>
-        <span><strong>Penilaian saat ini dilakukan oleh HR.</strong> Seluruh poin dievaluasi secara manual berdasarkan kriteria rubrik yang ditetapkan.</span>
-    </div>
+    @if (isset($aiResult) && $aiResult->status === 'completed')
+        <div class="disclaimer-banner success" style="background: rgba(99, 102, 241, 0.1); border-left: 4px solid #6366f1; padding: 12px 18px; margin-bottom: 20px; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <span style="font-size: 20px;">🤖</span>
+                <div>
+                    <strong style="color: #e0e7ff;">Smart Grading AI (S-BERT & Cosine Similarity) Aktif</strong>
+                    <div style="font-size: 12.5px; color: #cbd5e1; margin-top: 2px;">
+                        Prediksi Skor AI: <strong style="color: #a5b4fc;">{{ $aiResult->score }}/100</strong> · Model: <code>{{ $aiResult->model_version }}</code> · Waktu inferensi: {{ $aiResult->execution_time_ms }} ms
+                    </div>
+                </div>
+            </div>
+            <span style="font-size: 11px; background: rgba(99, 102, 241, 0.2); color: #c7d2fe; padding: 3px 10px; border-radius: var(--radius-pill); font-weight: 600;">
+                Tervalidasi Otomatis
+            </span>
+        </div>
+    @elseif (isset($aiResult) && $aiResult->status === 'failed')
+        <div class="disclaimer-banner error" style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 12px 18px; margin-bottom: 20px; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <span style="font-size: 20px;">⚠️</span>
+                <div>
+                    <strong style="color: #fca5a5;">Smart Grading AI Mengalami Kendala</strong>
+                    <div style="font-size: 12.5px; color: #cbd5e1; margin-top: 2px;">
+                        {{ $aiResult->error_message }} — Penilaian manual oleh HR tetap dapat dilakukan.
+                    </div>
+                </div>
+            </div>
+        </div>
+    @else
+        <div class="disclaimer-banner info">
+            <span>ℹ</span>
+            <span><strong>Smart Grading & Penilaian HR:</strong> Sistem menggunakan model S-BERT dan Cosine Similarity untuk menghasilkan draf evaluasi cerdas, didukung verifikasi penuh oleh tim HR.</span>
+        </div>
+    @endif
 
     <div class="grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
         <div>

@@ -32,6 +32,12 @@ Route::middleware(['auth.basic', 'role:hr'])->group(function () {
     Route::get('penilaian/{penugasan}/edit', [\App\Http\Controllers\PenilaianController::class, 'edit'])->name('penilaian.edit');
     Route::put('penilaian/{penugasan}', [\App\Http\Controllers\PenilaianController::class, 'update'])->name('penilaian.update');
     Route::post('penilaian/{penugasan}/publish', [\App\Http\Controllers\PenilaianController::class, 'togglePublish'])->name('penilaian.publish');
+    Route::post('penilaian/{penugasan}/retry-ai', [\App\Http\Controllers\PenilaianController::class, 'retrySmartGrading'])->name('penilaian.retry_ai');
+
+    // Automated Skill Matching (S-BERT)
+    Route::get('lowongan/{lowongan}/matching', [\App\Http\Controllers\SkillMatchingController::class, 'index'])->name('lowongan.matching');
+    Route::post('lowongan/{lowongan}/matching', [\App\Http\Controllers\SkillMatchingController::class, 'match'])->name('lowongan.matching.run');
+    Route::post('api/skill-matching/test', [\App\Http\Controllers\SkillMatchingController::class, 'apiMatch'])->name('api.skill_matching.test');
 });
 
 // Group Kandidat: Tes Saya
